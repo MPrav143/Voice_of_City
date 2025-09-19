@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Link } from "react-router-dom";
 export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -36,7 +36,9 @@ export default function Login() {
           </button>
         </form>
         <p className="mt-4 text-sm text-center text-gray-600">
-          Don’t have an account? <a href="#" className="text-green-600 font-semibold">Register</a>
+          Don’t have an account? <Link to="/register" className="text-green-600 font-semibold">
+        Register
+      </Link>
         </p>
       </div>
     </div>
