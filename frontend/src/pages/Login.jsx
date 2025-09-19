@@ -1,16 +1,44 @@
 import React from "react";
 
 export default function Login() {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert("🔑 Login feature will be connected to backend");
+  };
+
   return (
-    <div className="max-w-sm mx-auto p-6 border rounded mt-10 shadow">
-      <h2 className="text-2xl font-bold mb-4">Login</h2>
-      <form className="space-y-4">
-        <input type="email" placeholder="Email" className="w-full border p-2 rounded" />
-        <input type="password" placeholder="Password" className="w-full border p-2 rounded" />
-        <button className="bg-green-600 text-white px-4 py-2 rounded w-full">
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm">
+        <h2 className="text-2xl font-bold text-green-700 mb-6 text-center">
           Login
-        </button>
-      </form>
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block font-medium mb-1">Email</label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="w-full border p-3 rounded"
+              required
+            />
+          </div>
+          <div>
+            <label className="block font-medium mb-1">Password</label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              className="w-full border p-3 rounded"
+              required
+            />
+          </div>
+          <button className="bg-green-600 text-white px-6 py-3 rounded w-full font-semibold hover:bg-green-700">
+            Login
+          </button>
+        </form>
+        <p className="mt-4 text-sm text-center text-gray-600">
+          Don’t have an account? <a href="#" className="text-green-600 font-semibold">Register</a>
+        </p>
+      </div>
     </div>
   );
 }

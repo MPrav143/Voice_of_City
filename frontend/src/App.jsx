@@ -8,6 +8,7 @@ import ReportIssue from "./pages/ReportIssue";
 import Issues from "./pages/Issues";
 import Rewards from "./pages/Rewards";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/issues" element={<Issues />} />
           <Route path="/rewards" element={<Rewards />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </main>
       <Footer />
