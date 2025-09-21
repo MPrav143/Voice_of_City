@@ -1,6 +1,4 @@
-import React from "react";
-
-import { useState } from "react";
+import React, { useState } from "react";
 
 const mockIssues = [
   { id: 1, title: "Pothole on Main Street", status: "In Progress" },

@@ -1,46 +1,67 @@
-import React from "react";
-import { Link } from "react-router-dom";
+// Login.jsx (modified)
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { saveAuth } from "../utils/auth";
+
 export default function Login() {
-  const handleSubmit = (e) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("🔑 Login feature will be connected to backend");
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMessage(data.msg || "Login failed");
+        return;
+      }
+      // save token & user
+      saveAuth(data.token, data.user);
+      setMessage("Login successful");
+      // navigate based on role
+      if (data.user.role === "authority") navigate("/govt-dashboard");
+      else navigate("/report");
+    } catch (err) {
+      setMessage("Error logging in");
+    }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm">
-        <h2 className="text-2xl font-bold text-green-700 mb-6 text-center">
+    <div className="p-6 max-w-md mx-auto bg-white rounded shadow">
+      <h2 className="text-xl font-bold mb-4">Login</h2>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 border rounded"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 border rounded"
+          required
+        />
+        <button className="w-full bg-blue-500 text-white p-2 rounded">
           Login
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block font-medium mb-1">Email</label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-full border p-3 rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Password</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              className="w-full border p-3 rounded"
-              required
-            />
-          </div>
-          <button className="bg-green-600 text-white px-6 py-3 rounded w-full font-semibold hover:bg-green-700">
-            Login
-          </button>
-        </form>
-        <p className="mt-4 text-sm text-center text-gray-600">
-          Don’t have an account? <Link to="/register" className="text-green-600 font-semibold">
+        </button>
+      </form>
+      {message && <p className="mt-3 text-sm">{message}</p>}
+      <p>Don't have an account? </p>
+      <Link to="/register" className="text-blue-500 text-sm mt-2 inline-block">
         Register
       </Link>
-        </p>
-      </div>
     </div>
   );
 }

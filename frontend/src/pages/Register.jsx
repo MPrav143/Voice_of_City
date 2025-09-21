@@ -1,11 +1,42 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
 export default function Register() {
   const [role, setRole] = useState("user"); // "user" or "authority"
+  const [formData, setFormData] = useState({});
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  // Handle input changes
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Submit to backend
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`📝 Register feature for ${role} will be connected to backend`);
+
+    if (formData.password !== formData.confirmPassword) {
+      setMessage("❌ Passwords do not match");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role, ...formData }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage("✅ Registered successfully!");
+        setTimeout(() => navigate("/login"), 1500);
+      } else {
+        setMessage(data.message || "❌ Registration failed");
+      }
+    } catch (err) {
+      setMessage("⚠️ Error connecting to server");
+    }
   };
 
   return (
@@ -45,130 +76,111 @@ export default function Register() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {role === "user" ? (
             <>
-              <div>
-                <label className="block font-medium mb-1">Name</label>
-                <input
-                  type="text"
-                  placeholder="Enter your name"
-                  className="w-full border p-3 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Phone No</label>
-                <input
-                  type="tel"
-                  placeholder="Enter phone number"
-                  className="w-full border p-3 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Address</label>
-                <textarea
-                  placeholder="Enter your address"
-                  className="w-full border p-3 rounded"
-                  required
-                ></textarea>
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Email ID</label>
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full border p-3 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Password</label>
-                <input
-                  type="password"
-                  placeholder="Enter password"
-                  className="w-full border p-3 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Confirm Password</label>
-                <input
-                  type="password"
-                  placeholder="Confirm password"
-                  className="w-full border p-3 rounded"
-                  required
-                />
-              </div>
+              <input
+                name="name"
+                type="text"
+                placeholder="Enter your name"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              />
+              <input
+                name="phone"
+                type="tel"
+                placeholder="Enter phone number"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              />
+              <textarea
+                name="address"
+                placeholder="Enter your address"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              ></textarea>
+              <input
+                name="email"
+                type="email"
+                placeholder="Enter your email"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              />
+              <input
+                name="password"
+                type="password"
+                placeholder="Enter password"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              />
+              <input
+                name="confirmPassword"
+                type="password"
+                placeholder="Confirm password"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              />
             </>
           ) : (
             <>
-              <div>
-                <label className="block font-medium mb-1">Name</label>
-                <input
-                  type="text"
-                  placeholder="Enter authority name"
-                  className="w-full border p-3 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Email ID</label>
-                <input
-                  type="email"
-                  placeholder="Enter authority email"
-                  className="w-full border p-3 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">
-                  Taluk / Corporation / Municipality
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter jurisdiction"
-                  className="w-full border p-3 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">
-                  Address of Taluk / Corporation / Municipality
-                </label>
-                <textarea
-                  placeholder="Enter address"
-                  className="w-full border p-3 rounded"
-                  required
-                ></textarea>
-              </div>
-              <div>
-                <label className="block font-medium mb-1">
-                  Position / Department
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Head of Sanitation Dept"
-                  className="w-full border p-3 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Password</label>
-                <input
-                  type="password"
-                  placeholder="Enter password"
-                  className="w-full border p-3 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Confirm Password</label>
-                <input
-                  type="password"
-                  placeholder="Confirm password"
-                  className="w-full border p-3 rounded"
-                  required
-                />
-              </div>
+              <input
+                name="name"
+                type="text"
+                placeholder="Enter authority name"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              />
+              <input
+                name="email"
+                type="email"
+                placeholder="Enter authority email"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              />
+              <input
+                name="jurisdiction"
+                type="text"
+                placeholder="Taluk / Corporation / Municipality"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              />
+              <textarea
+                name="jurisdictionAddress"
+                placeholder="Address of Taluk / Corporation / Municipality"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              ></textarea>
+              <input
+                name="position"
+                type="text"
+                placeholder="e.g. Head of Sanitation Dept"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              />
+              <input
+                name="password"
+                type="password"
+                placeholder="Enter password"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              />
+              <input
+                name="confirmPassword"
+                type="password"
+                placeholder="Confirm password"
+                className="w-full border p-3 rounded"
+                onChange={handleChange}
+                required
+              />
             </>
           )}
 
@@ -177,11 +189,15 @@ export default function Register() {
           </button>
         </form>
 
+        {message && (
+          <p className="mt-4 text-center text-sm text-red-600">{message}</p>
+        )}
+
         <p className="mt-4 text-sm text-center text-gray-600">
           Already have an account?{" "}
           <Link to="/login" className="text-green-600 font-semibold">
-                Login
-            </Link>
+            Login
+          </Link>
         </p>
       </div>
     </div>

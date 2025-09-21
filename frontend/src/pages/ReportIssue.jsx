@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Mic, MicOff, Circle } from "lucide-react"; // fixed icon imports
+import { Mic, MicOff, Circle } from "lucide-react"; // icons
 
 export default function ReportIssue() {
   const [description, setDescription] = useState("");
@@ -14,7 +14,6 @@ export default function ReportIssue() {
   const [preview, setPreview] = useState(null);
 
   const [warning, setWarning] = useState("");
-  const [timestamp, setTimestamp] = useState("");
 
   // Supported languages for speech recognition
   const supportedLanguages = [
@@ -25,10 +24,10 @@ export default function ReportIssue() {
     { label: "Tamil", value: "ta-IN" },
     { label: "Telugu", value: "te-IN" },
     { label: "Malayalam", value: "ml-IN" },
-    { label: "Other / Unsupported", value: "other" }, // fallback for regional languages
+    { label: "Other / Unsupported", value: "other" },
   ];
 
-  // get geolocation once on mount
+  // Get geolocation on mount
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -46,7 +45,7 @@ export default function ReportIssue() {
 
   // Initialize speech recognition
   const initRecognition = (lang) => {
-    if (lang === "other") return null; // skip unsupported languages
+    if (lang === "other") return null;
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -90,7 +89,7 @@ export default function ReportIssue() {
     }
   };
 
-  // Audio recording fallback
+  // Toggle audio recording (fallback for unsupported langs)
   const toggleAudioRecording = async () => {
     if (!isRecording) {
       try {
@@ -118,6 +117,7 @@ export default function ReportIssue() {
     }
   };
 
+  // Handle image upload
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -141,21 +141,40 @@ export default function ReportIssue() {
     }
   };
 
-  const handleSubmit = (e) => {
+  // Submit handler
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (warning) {
       alert("Cannot submit: " + warning);
       return;
     }
-    setTimestamp(new Date().toISOString());
+    const formData = new FormData();
+    formData.append("description", description);
+    formData.append("location", location);
+    formData.append("timestamp", new Date().toISOString());
+    if (image) formData.append("image", image);
+    if (audioBlob) formData.append("audio", audioBlob, "recording.wav");
 
-    console.log({
-      image,
-      location,
-      timestamp: new Date().toISOString(),
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/report", {
+        method: "POST",
+        body: formData,
+      });
 
-    alert("Issue submitted successfully!");
+      const data = await res.json();
+      if (data.success) {
+        alert("✅ Issue submitted successfully!");
+        setDescription("");
+        setImage(null);
+        setPreview(null);
+        setAudioBlob(null);
+      } else {
+        alert("❌ Failed: " + data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ Error submitting issue");
+    }
   };
 
   return (
@@ -186,7 +205,7 @@ export default function ReportIssue() {
                 ))}
               </select>
 
-              {/* Mic button for supported languages */}
+              {/* Mic button */}
               <button
                 type="button"
                 onClick={toggleSpeechRecognition}
@@ -252,7 +271,7 @@ export default function ReportIssue() {
           {warning && <p className="text-red-600 mt-2">{warning}</p>}
         </div>
 
-        {/* Location (hidden from user, just auto-filled) */}
+        {/* Location (hidden input) */}
         <input type="hidden" value={location} readOnly />
 
         {/* Submit */}
