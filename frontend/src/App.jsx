@@ -10,7 +10,7 @@ import Rewards from "./pages/Rewards";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
-
+import GovtDashboard from "./pages/GovtDashboard";
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -23,6 +23,7 @@ function App() {
           <Route path="/rewards" element={<Rewards />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register/>}/>
+          <Route path="/govt-dashboard" element={<GovtDashboard/>}/>
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </main>

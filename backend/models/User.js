@@ -8,7 +8,13 @@ const UserSchema = new mongoose.Schema({
   role: { type: String, enum: ["user", "authority"], default: "user" },
   phone: { type: String },
   address: { type: String },
-  jurisdiction: { type: String } // for authority users
+  jurisdiction: { 
+    type: String, 
+    enum: ["Roads", "Sanitation", "Waterworks", "General"], 
+    default: "General",
+    required: function() { return this.role === "authority"; }
+  }
+ // for authority users
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", UserSchema);

@@ -22,7 +22,7 @@ export default function Register() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/register", {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role, ...formData }),
@@ -74,113 +74,225 @@ export default function Register() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {role === "user" ? (
+          {/* Citizen User Form */}
+          {role === "user" && (
             <>
-              <input
-                name="name"
-                type="text"
-                placeholder="Enter your name"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              />
-              <input
-                name="phone"
-                type="tel"
-                placeholder="Enter phone number"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              />
-              <textarea
-                name="address"
-                placeholder="Enter your address"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              ></textarea>
-              <input
-                name="email"
-                type="email"
-                placeholder="Enter your email"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              />
-              <input
-                name="password"
-                type="password"
-                placeholder="Enter password"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              />
-              <input
-                name="confirmPassword"
-                type="password"
-                placeholder="Confirm password"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              />
+              <div>
+                <label className="block mb-1 font-semibold" htmlFor="name">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="Enter your name"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold" htmlFor="phone">
+                  Phone Number
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  placeholder="Enter phone number"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block mb-1 font-semibold"
+                  htmlFor="address"
+                >
+                  Address
+                </label>
+                <textarea
+                  id="address"
+                  name="address"
+                  placeholder="Enter your address"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                ></textarea>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold" htmlFor="email">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold" htmlFor="password">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter password"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block mb-1 font-semibold"
+                  htmlFor="confirmPassword"
+                >
+                  Confirm Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="Confirm password"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </>
-          ) : (
+          )}
+
+          {/* Authority User Form */}
+          {role === "authority" && (
             <>
-              <input
-                name="name"
-                type="text"
-                placeholder="Enter authority name"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              />
-              <input
-                name="email"
-                type="email"
-                placeholder="Enter authority email"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              />
-              <input
-                name="jurisdiction"
-                type="text"
-                placeholder="Taluk / Corporation / Municipality"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              />
-              <textarea
-                name="jurisdictionAddress"
-                placeholder="Address of Taluk / Corporation / Municipality"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              ></textarea>
-              <input
-                name="position"
-                type="text"
-                placeholder="e.g. Head of Sanitation Dept"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              />
-              <input
-                name="password"
-                type="password"
-                placeholder="Enter password"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              />
-              <input
-                name="confirmPassword"
-                type="password"
-                placeholder="Confirm password"
-                className="w-full border p-3 rounded"
-                onChange={handleChange}
-                required
-              />
+              <div>
+                <label className="block mb-1 font-semibold" htmlFor="name">
+                  Authority Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="Enter authority name"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold" htmlFor="email">
+                  Authority Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Enter authority email"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block mb-1 font-semibold"
+                  htmlFor="jurisdiction"
+                >
+                  Jurisdiction
+                </label>
+                <select
+                  id="jurisdiction"
+                  name="jurisdiction"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Jurisdiction</option>
+                  <option value="Roads">Roads</option>
+                  <option value="Sanitation">Sanitation</option>
+                  <option value="Waterworks">Waterworks</option>
+                  <option value="General">General</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  className="block mb-1 font-semibold"
+                  htmlFor="jurisdictionAddress"
+                >
+                  Address of Taluk / Corporation / Municipality
+                </label>
+                <textarea
+                  id="jurisdictionAddress"
+                  name="jurisdictionAddress"
+                  placeholder="Enter address"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                ></textarea>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold" htmlFor="position">
+                  Position
+                </label>
+                <input
+                  id="position"
+                  name="position"
+                  type="text"
+                  placeholder="e.g. Head of Sanitation Dept"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold" htmlFor="password">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter password"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block mb-1 font-semibold"
+                  htmlFor="confirmPassword"
+                >
+                  Confirm Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="Confirm password"
+                  className="w-full border p-3 rounded"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </>
           )}
 

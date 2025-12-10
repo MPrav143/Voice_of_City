@@ -1,5 +1,6 @@
+// src/components/ReportIssue.jsx
 import React, { useState, useRef, useEffect } from "react";
-import { Mic, MicOff, Circle } from "lucide-react"; // icons
+import { Mic, MicOff, Circle } from "lucide-react";
 
 export default function ReportIssue() {
   const [description, setDescription] = useState("");
@@ -13,9 +14,6 @@ export default function ReportIssue() {
   const audioChunksRef = useRef([]);
   const [preview, setPreview] = useState(null);
 
-  const [warning, setWarning] = useState("");
-
-  // Supported languages for speech recognition
   const supportedLanguages = [
     { label: "English", value: "en-US" },
     { label: "Hindi", value: "hi-IN" },
@@ -27,32 +25,23 @@ export default function ReportIssue() {
     { label: "Other / Unsupported", value: "other" },
   ];
 
-  // Get geolocation on mount
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const coords = `${pos.coords.latitude},${pos.coords.longitude}`;
-          setLocation(coords);
-        },
-        (err) => {
-          console.warn("Location error:", err);
-          setLocation("Unavailable");
-        }
+        (pos) => setLocation(`${pos.coords.latitude},${pos.coords.longitude}`),
+        () => setLocation("Unavailable")
       );
     }
   }, []);
 
-  // Initialize speech recognition
+  // --- Speech Recognition & Audio Recording (same as before) ---
   const initRecognition = (lang) => {
     if (lang === "other") return null;
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("Speech recognition not supported in this browser.");
+      alert("Speech recognition not supported.");
       return null;
     }
-
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
@@ -62,20 +51,17 @@ export default function ReportIssue() {
       const transcript = event.results[0][0].transcript;
       setDescription((prev) => prev + " " + transcript);
     };
-
     recognition.onerror = () => setIsRecording(false);
     recognition.onend = () => setIsRecording(false);
 
     return recognition;
   };
 
-  // Toggle speech recognition
   const toggleSpeechRecognition = () => {
     if (language === "other") {
-      alert("Speech recognition unavailable. Please use audio recording.");
+      alert("Speech recognition unavailable. Use audio recording.");
       return;
     }
-
     if (!isRecording) {
       const recognition = initRecognition(language);
       if (recognition) {
@@ -89,7 +75,6 @@ export default function ReportIssue() {
     }
   };
 
-  // Toggle audio recording (fallback for unsupported langs)
   const toggleAudioRecording = async () => {
     if (!isRecording) {
       try {
@@ -98,8 +83,7 @@ export default function ReportIssue() {
         mediaRecorderRef.current = mediaRecorder;
         audioChunksRef.current = [];
 
-        mediaRecorder.ondataavailable = (e) =>
-          audioChunksRef.current.push(e.data);
+        mediaRecorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
         mediaRecorder.onstop = () => {
           const blob = new Blob(audioChunksRef.current, { type: "audio/wav" });
           setAudioBlob(blob);
@@ -117,59 +101,60 @@ export default function ReportIssue() {
     }
   };
 
-  // Handle image upload
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setImage(file);
     setPreview(URL.createObjectURL(file));
-
-    if (window.EXIF) {
-      window.EXIF.getData(file, function () {
-        const gps = window.EXIF.getTag(this, "GPSLatitude");
-        const dateTaken = window.EXIF.getTag(this, "DateTimeOriginal");
-
-        if (!gps || !dateTaken) {
-          setWarning(
-            "⚠️ This image seems shared/downloaded. Please upload a fresh photo."
-          );
-        } else {
-          setWarning("");
-        }
-      });
-    }
   };
 
-  // Submit handler
+  // --- Submit Report ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (warning) {
-      alert("Cannot submit: " + warning);
+
+    if (!description && !image && !audioBlob) {
+      alert("Please provide a description, image, or audio.");
       return;
     }
+
+    const token = localStorage.getItem("token"); // <- IMPORTANT
+    if (!token) {
+      alert("❌ You must be logged in to submit a report.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("description", description);
     formData.append("location", location);
     formData.append("timestamp", new Date().toISOString());
-    if (image) formData.append("image", image);
-    if (audioBlob) formData.append("audio", audioBlob, "recording.wav");
+    formData.append("uniqueToken", Date.now());
+
+    if (image) formData.append("image", image, `${Date.now()}_${image.name}`);
+    if (audioBlob) formData.append("audio", audioBlob, `${Date.now()}_recording.wav`);
 
     try {
-      const res = await fetch("http://localhost:5000/api/report", {
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const res = await fetch(`${API_URL}/api/reports`, {
         method: "POST",
         body: formData,
+        headers: { Authorization: `Bearer ${token}` }, // <- MUST include token
       });
 
       const data = await res.json();
-      if (data.success) {
+      console.log("Backend response:", data);
+
+      if (res.status === 409) {
+        alert("⚠️ Similar report already exists.");
+      } else if (res.status === 401) {
+        alert("❌ Unauthorized. Please login.");
+      } else if (data.success) {
         alert("✅ Issue submitted successfully!");
         setDescription("");
         setImage(null);
         setPreview(null);
         setAudioBlob(null);
       } else {
-        alert("❌ Failed: " + data.error);
+        alert("❌ Failed: " + (data.error || "Unknown error"));
       }
     } catch (err) {
       console.error(err);
@@ -183,15 +168,11 @@ export default function ReportIssue() {
         Report a Civic Issue
       </h2>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 bg-white p-4 sm:p-6 rounded-lg shadow-lg"
-      >
-        {/* Description + language + mic */}
+      <form onSubmit={handleSubmit} className="space-y-6 bg-white p-4 sm:p-6 rounded-lg shadow-lg">
+        {/* Description + Speech */}
         <div>
           <label className="block font-medium mb-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <span>Description</span>
-
             <div className="flex items-center gap-2">
               <select
                 value={language}
@@ -199,37 +180,23 @@ export default function ReportIssue() {
                 className="border rounded p-1 text-sm sm:text-base"
               >
                 {supportedLanguages.map((lang) => (
-                  <option key={lang.value} value={lang.value}>
-                    {lang.label}
-                  </option>
+                  <option key={lang.value} value={lang.value}>{lang.label}</option>
                 ))}
               </select>
 
-              {/* Mic button */}
               <button
                 type="button"
                 onClick={toggleSpeechRecognition}
-                className={`p-2 rounded-full ${
-                  isRecording && language !== "other"
-                    ? "bg-red-500 text-white"
-                    : "bg-gray-200"
-                }`}
+                className={`p-2 rounded-full ${isRecording && language !== "other" ? "bg-red-500 text-white" : "bg-gray-200"}`}
               >
-                {isRecording && language !== "other" ? (
-                  <MicOff size={20} />
-                ) : (
-                  <Mic size={20} />
-                )}
+                {isRecording && language !== "other" ? <MicOff size={20} /> : <Mic size={20} />}
               </button>
 
-              {/* Audio record button for unsupported languages */}
               {language === "other" && (
                 <button
                   type="button"
                   onClick={toggleAudioRecording}
-                  className={`p-2 rounded-full ${
-                    isRecording ? "bg-red-500 text-white" : "bg-gray-200"
-                  }`}
+                  className={`p-2 rounded-full ${isRecording ? "bg-red-500 text-white" : "bg-gray-200"}`}
                 >
                   <Circle size={20} />
                 </button>
@@ -268,13 +235,9 @@ export default function ReportIssue() {
               className="mt-4 h-40 w-full object-cover rounded shadow"
             />
           )}
-          {warning && <p className="text-red-600 mt-2">{warning}</p>}
         </div>
 
-        {/* Location (hidden input) */}
         <input type="hidden" value={location} readOnly />
-
-        {/* Submit */}
         <button className="bg-green-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded w-full font-semibold hover:bg-green-700 text-sm sm:text-base">
           Submit Issue
         </button>

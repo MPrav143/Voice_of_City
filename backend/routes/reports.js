@@ -68,33 +68,33 @@ module.exports = function(io) {
       }
 
       // GEO duplicate check: find any report within 20 meters
-      if (geoPoint) {
-        const nearby = await Report.findOne({
-          location: {
-            $nearSphere: {
-              $geometry: geoPoint,
-              $maxDistance: 20 // meters
-            }
-          }
-        });
+      // if (geoPoint) {
+      //   const nearby = await Report.findOne({
+      //     location: {
+      //       $nearSphere: {
+      //         $geometry: geoPoint,
+      //         $maxDistance: 1 // meters
+      //       }
+      //     }
+      //   });
 
-        if (nearby) {
-          // optionally further compare images using embeddings
-          let isDuplicate = true;
-          if (nearby.embedding && embedding) {
-            // compute cosine similarity
-            const dot = embedding.reduce((s, v, i) => s + v * (nearby.embedding[i] || 0), 0);
-            const normA = Math.sqrt(embedding.reduce((s, v) => s + v * v, 0));
-            const normB = Math.sqrt(nearby.embedding.reduce((s, v) => s + v * v, 0));
-            const cos = dot / (normA * normB + 1e-10);
-            if (cos < 0.80) isDuplicate = false; // threshold
-          }
-          if (isDuplicate) {
-            // return duplicate info
-            return res.status(409).json({ success: false, duplicate: true, msg: "An issue was already reported nearby.", existingReportId: nearby._id });
-          }
-        }
-      }
+      //   if (nearby) {
+      //     // optionally further compare images using embeddings
+      //     let isDuplicate = true;
+      //     if (nearby.embedding && embedding) {
+      //       // compute cosine similarity
+      //       const dot = embedding.reduce((s, v, i) => s + v * (nearby.embedding[i] || 0), 0);
+      //       const normA = Math.sqrt(embedding.reduce((s, v) => s + v * v, 0));
+      //       const normB = Math.sqrt(nearby.embedding.reduce((s, v) => s + v * v, 0));
+      //       const cos = dot / (normA * normB + 1e-10);
+      //       if (cos < 0.80) isDuplicate = false; // threshold
+      //     }
+      //     if (isDuplicate) {
+      //       // return duplicate info
+      //       return res.status(409).json({ success: false, duplicate: true, msg: "An issue was already reported nearby.", existingReportId: nearby._id });
+      //     }
+      //   }
+      // }
 
       // Save report
       const report = new Report({
